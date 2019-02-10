@@ -56,7 +56,8 @@ class FurtherStatefulIteratorTests extends WordSpec with Matchers with Idiomatic
           val parent = List(1, 2, 3).iterator
           def next(): Int = parent.next
           def hasNext: Boolean = {
-            counter += 1; parent.hasNext
+            counter += 1
+            parent.hasNext
           }
         }
         // Iterate separately
@@ -77,6 +78,22 @@ class FurtherStatefulIteratorTests extends WordSpec with Matchers with Idiomatic
         (Iterator.empty ++ it ++ it).foreach(res += _)
         assertSameElements(exp, res)
         counter shouldBe 8 // was 14
+      }
+
+      "be sufficiently lazy in toStream" in {
+        val results = collection.mutable.ListBuffer.empty[Int]
+        def mkIterator = (1 to 5).iterator map (x => {
+          results += x; x
+        })
+        def mkInfinite = Iterator continually {
+          results += 1; 1
+        }
+        // Stream is strict in its head so we should see 1 from each of them.
+        val s1 = mkIterator.toStream
+        val s2 = mkInfinite.toStream
+        // back and forth without slipping into nontermination.
+        results += (Stream from 1).toIterator.drop(10).toStream.drop(10).toIterator.next()
+        assertSameElements(List(1, 1, 21), results)
       }
     }
 
@@ -117,39 +134,20 @@ class FurtherStatefulIteratorTests extends WordSpec with Matchers with Idiomatic
         i0.hasNext wasCalled fourTimes
         i1.hasNext wasCalled fourTimes
       }
+
+      "be sufficiently lazy in toStream" in {
+        val iteratorFunc = spyLambda((x: Int) => "anyRef")
+        val infiniteFunc = spyLambda(() => "anyRef")
+        (1 to 5).iterator.map(iteratorFunc).toStream
+        Iterator.continually(infiniteFunc()).toStream
+        iteratorFunc.apply(1) wasCalled once
+        infiniteFunc.apply() wasCalled once
+      }
+
+      "go back and forth correctly between iterator and stream" in {
+        (Stream from 1).toIterator.drop(10).toStream.drop(10).toIterator.next() shouldBe 21
+      }
     }
-
-    //    @Test def toStreamIsSufficientlyLazy(): Unit = {
-    //      val results = collection.mutable.ListBuffer.empty[Int]
-    //      def mkIterator = (1 to 5).iterator map (x => {
-    //        results += x; x
-    //      })
-    //      def mkInfinite = Iterator continually {
-    //        results += 1; 1
-    //      }
-    //      // Stream is strict in its head so we should see 1 from each of them.
-    //      val s1 = mkIterator.toStream
-    //      val s2 = mkInfinite.toStream
-    //      // back and forth without slipping into nontermination.
-    //      results += (Stream from 1).toIterator.drop(10).toStream.drop(10).toIterator.next()
-    //      assertSameElements(List(1, 1, 21), results)
-    //    }
-    //
-    //    @Test def toStreamIsSufficientlyLazyWithSpy(): Unit = {
-    //      val iteratorFunc = spy(new Function1[Int, Int] { def apply(x: Int) = { 1 } })
-    //      val infiniteFunc = spy(new Function0[Int] { def apply() = { 1 } })
-    //
-    //      (1 to 5).iterator.map(iteratorFunc).toStream
-    //      Iterator.continually(infiniteFunc()).toStream
-    //
-    //      verify(iteratorFunc, times(1)).apply(1)
-    //      verify(infiniteFunc, times(1)).apply()
-    //    }
-    //
-    //    @Test def toStreamIsSufficientlyLazyWithSpyStreamFrom(): Unit = {
-    //      assertEquals(21, (Stream from 1).toIterator.drop(10).toStream.drop(10).toIterator.next())
-    //    }
-
   }
 
   def assertSameElements[A, B >: A](expected: IterableLike[A, _], actual: GenIterable[B], message: String = ""): Unit =
