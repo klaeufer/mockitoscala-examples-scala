@@ -4,110 +4,119 @@ import org.scalatest.{ Matchers, WordSpec }
 import scala.collection.{ GenIterable, IterableLike, mutable }
 import scala.runtime.ScalaRunTime.stringOf
 
-class FurtherSpyExplorations2 extends WordSpec with Matchers with IdiomaticMockito {
+class FurtherStatefulIteratorTests extends WordSpec with Matchers with IdiomaticMockito {
 
-  "Iterator.sliding" should {
+  "Iterator.sliding" when {
 
     // IteratorTests.scala
-    "not ask for unneeded element when tested using mutable state" in {
-      var counter = 0
-      val it = new Iterator[Int] {
-        var i = 0
-        def hasNext = {
-          println("hasNext " + counter)
-          counter = i
-          true
+    "tested using mutable state" should {
+
+      "not ask for unneeded element" in {
+        var counter = 0
+        val it = new Iterator[Int] {
+          var i = 0
+          def hasNext = {
+            println("hasNext " + counter)
+            counter = i
+            true
+          }
+          def next = {
+            println("next " + counter)
+            i += 1
+            i
+          }
         }
-        def next = {
-          println("next " + counter)
-          i += 1
-          i
-        }
+        val slidingIt = it sliding 2
+        slidingIt.next
+        // Counter should be one, that means we didn't look further than needed
+        counter shouldBe 1
       }
-      val slidingIt = it sliding 2
-      slidingIt.next
-      // Counter should be one, that means we didn't look further than needed
-      counter shouldBe 1
     }
 
-    "not ask for unneeded element when tested using spy" in {
-      val it = spy(Iterator.continually("hello"))
-      val slidingIt = it sliding 2
-      slidingIt.next()
-      it.next() wasCalled twice
+    "tested using spy" should {
+
+      "not ask for unneeded element" in {
+        val it = spy(Iterator.continually("hello"))
+        val slidingIt = it sliding 2
+        slidingIt.next()
+        it.next() wasCalled twice
+      }
     }
   }
 
-  "Iterator" should {
+  "Iterator" when {
 
-    // scala/bug#9623
-    "not excessively check hasNext in join when tested using mutable state" in {
-      var counter = 0
-      val exp = List(1, 2, 3, 1, 2, 3)
-      def it: Iterator[Int] = new Iterator[Int] {
-        val parent = List(1, 2, 3).iterator
-        def next(): Int = parent.next
-        def hasNext: Boolean = {
-          counter += 1; parent.hasNext
+    "tested using mutable state" should {
+
+      // scala/bug#9623
+      "not excessively check hasNext in iteration/join/concatenation" in {
+        var counter = 0
+        val exp = List(1, 2, 3, 1, 2, 3)
+        def it: Iterator[Int] = new Iterator[Int] {
+          val parent = List(1, 2, 3).iterator
+          def next(): Int = parent.next
+          def hasNext: Boolean = {
+            counter += 1; parent.hasNext
+          }
         }
+        // Iterate separately
+        val res = new mutable.ArrayBuffer[Int]
+        it.foreach(res += _)
+        it.foreach(res += _)
+        assertSameElements(exp, res)
+        counter shouldBe 8
+        // JoinIterator
+        counter = 0
+        res.clear
+        (it ++ it).foreach(res += _)
+        assertSameElements(exp, res)
+        counter shouldBe 8 // was 17
+        // ConcatIterator
+        counter = 0
+        res.clear
+        (Iterator.empty ++ it ++ it).foreach(res += _)
+        assertSameElements(exp, res)
+        counter shouldBe 8 // was 14
       }
-      // Iterate separately
-      val res = new mutable.ArrayBuffer[Int]
-      it.foreach(res += _)
-      it.foreach(res += _)
-      assertSameElements(exp, res)
-      counter shouldBe 8
-      // JoinIterator
-      counter = 0
-      res.clear
-      (it ++ it).foreach(res += _)
-      assertSameElements(exp, res)
-      counter shouldBe 8 // was 17
-      // ConcatIterator
-      counter = 0
-      res.clear
-      (Iterator.empty ++ it ++ it).foreach(res += _)
-      assertSameElements(exp, res)
-      counter shouldBe 8 // was 14
     }
 
-    "not excessively check hasNext in iteration when tested using spy" in {
-      val exp = List(1, 2, 3, 1, 2, 3)
-      def it = spy(Iterator(1, 2, 3))
-      // Iterate separately
-      val i0 = it
-      val r0 = i0.toList
-      val i1 = it
-      val r1 = i1.toList
-      assertSameElements(exp, r0 ++ r1)
-      i0.hasNext wasCalled fourTimes
-      i1.hasNext wasCalled fourTimes
-    }
+    "tested using spy" should {
 
-    "not excessively check hasNext in join when tested using spy" in {
-      val exp = List(1, 2, 3, 1, 2, 3)
-      def it = spy(Iterator(1, 2, 3))
-      // JoinIterator
-      val res = new mutable.ArrayBuffer[Int]
-      val i0 = it
-      val i1 = it
-      (i0 ++ i1).foreach(res += _)
-      assertSameElements(exp, res)
-      i0.hasNext wasCalled fourTimes
-      i1.hasNext wasCalled fourTimes
-    }
+      "not excessively check hasNext in separate iterations" in {
+        val exp = List(1, 2, 3, 1, 2, 3)
+        def it = spy(Iterator(1, 2, 3))
+        val i0 = it
+        val r0 = i0.toList
+        val i1 = it
+        val r1 = i1.toList
+        assertSameElements(exp, r0 ++ r1)
+        i0.hasNext wasCalled fourTimes
+        i1.hasNext wasCalled fourTimes
+      }
 
-    "not excessively check hasNext in concatenation when tested using spy" in {
-      val exp = List(1, 2, 3, 1, 2, 3)
-      def it = spy(Iterator(1, 2, 3))
-      // ConcatIterator
-      val res = new mutable.ArrayBuffer[Int]
-      val i0 = it
-      val i1 = it
-      (Iterator.empty ++ i0 ++ i1).foreach(res += _)
-      assertSameElements(exp, res)
-      i0.hasNext wasCalled fourTimes
-      i1.hasNext wasCalled fourTimes
+      "not excessively check hasNext in join" in {
+        val exp = List(1, 2, 3, 1, 2, 3)
+        def it = spy(Iterator(1, 2, 3))
+        val res = new mutable.ArrayBuffer[Int]
+        val i0 = it
+        val i1 = it
+        (i0 ++ i1).foreach(res += _)
+        assertSameElements(exp, res)
+        i0.hasNext wasCalled fourTimes
+        i1.hasNext wasCalled fourTimes
+      }
+
+      "not excessively check hasNext in concatenation" in {
+        val exp = List(1, 2, 3, 1, 2, 3)
+        def it = spy(Iterator(1, 2, 3))
+        val res = new mutable.ArrayBuffer[Int]
+        val i0 = it
+        val i1 = it
+        (Iterator.empty ++ i0 ++ i1).foreach(res += _)
+        assertSameElements(exp, res)
+        i0.hasNext wasCalled fourTimes
+        i1.hasNext wasCalled fourTimes
+      }
     }
 
     //    @Test def toStreamIsSufficientlyLazy(): Unit = {
