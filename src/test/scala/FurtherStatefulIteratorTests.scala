@@ -64,19 +64,19 @@ class FurtherStatefulIteratorTests extends WordSpec with Matchers with Idiomatic
         val res = new mutable.ArrayBuffer[Int]
         it.foreach(res += _)
         it.foreach(res += _)
-        assertSameElements(exp, res)
+        res shouldBe exp
         counter shouldBe 8
         // JoinIterator
         counter = 0
         res.clear
         (it ++ it).foreach(res += _)
-        assertSameElements(exp, res)
+        res shouldBe exp
         counter shouldBe 8 // was 17
         // ConcatIterator
         counter = 0
         res.clear
         (Iterator.empty ++ it ++ it).foreach(res += _)
-        assertSameElements(exp, res)
+        res shouldBe exp
         counter shouldBe 8 // was 14
       }
 
@@ -93,7 +93,7 @@ class FurtherStatefulIteratorTests extends WordSpec with Matchers with Idiomatic
         val s2 = mkInfinite.toStream
         // back and forth without slipping into nontermination.
         results += (Stream from 1).toIterator.drop(10).toStream.drop(10).toIterator.next()
-        assertSameElements(List(1, 1, 21), results)
+        results shouldBe List(1, 1, 21)
       }
     }
 
@@ -106,7 +106,7 @@ class FurtherStatefulIteratorTests extends WordSpec with Matchers with Idiomatic
         val r0 = i0.toList
         val i1 = it
         val r1 = i1.toList
-        assertSameElements(exp, r0 ++ r1)
+        (r0 ++ r1) shouldBe exp
         i0.hasNext wasCalled fourTimes
         i1.hasNext wasCalled fourTimes
       }
@@ -118,7 +118,7 @@ class FurtherStatefulIteratorTests extends WordSpec with Matchers with Idiomatic
         val i0 = it
         val i1 = it
         (i0 ++ i1).foreach(res += _)
-        assertSameElements(exp, res)
+        res shouldBe exp
         i0.hasNext wasCalled fourTimes
         i1.hasNext wasCalled fourTimes
       }
@@ -130,7 +130,7 @@ class FurtherStatefulIteratorTests extends WordSpec with Matchers with Idiomatic
         val i0 = it
         val i1 = it
         (Iterator.empty ++ i0 ++ i1).foreach(res += _)
-        assertSameElements(exp, res)
+        res shouldBe exp
         i0.hasNext wasCalled fourTimes
         i1.hasNext wasCalled fourTimes
       }
@@ -149,15 +149,4 @@ class FurtherStatefulIteratorTests extends WordSpec with Matchers with Idiomatic
       }
     }
   }
-
-  def assertSameElements[A, B >: A](expected: IterableLike[A, _], actual: GenIterable[B], message: String = ""): Unit =
-    if (!(expected sameElements actual))
-      fail(
-        f"${if (message.nonEmpty) s"$message " else ""}expected:<${stringOf(expected)}> but was:<${stringOf(actual)}>")
-
-  /**
-   * Convenient for testing iterators.
-   */
-  def assertSameElements[A, B >: A](expected: IterableLike[A, _], actual: Iterator[B]): Unit =
-    assertSameElements(expected, actual.toList, "")
 }
