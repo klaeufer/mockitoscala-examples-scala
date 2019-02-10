@@ -23,7 +23,7 @@ class IteratorMapIsLazy extends WordSpec with Matchers with IdiomaticMockito {
     "when tested via a spy" should {
 
       "be lazy" in {
-        val it = spy(Iterator.continually("hello"))
+        val it = spy(Iterator.continually("anyRef"))
         val result = it.map(_.length)
         it.next() wasNever called
         result.next()
