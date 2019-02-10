@@ -1,8 +1,7 @@
 import org.mockito.IdiomaticMockito
 import org.scalatest.{ Matchers, WordSpec }
 
-import scala.collection.{ GenIterable, IterableLike, mutable }
-import scala.runtime.ScalaRunTime.stringOf
+import scala.collection.mutable
 
 class FurtherStatefulIteratorTests extends WordSpec with Matchers with IdiomaticMockito {
 
