@@ -22,7 +22,9 @@ class TestIssue10709 extends WordSpec with Matchers with IdiomaticMockito {
   // TODO make more DRY
 
   "Iterator.scanLeft" when {
+
     "given an empty iterator" should {
+
       "produce the correct a singleton result" in {
         val result = Seq.empty[Int].iterator.scanLeft(0)(_ + _)
         result.toSeq shouldBe Seq(0)
@@ -30,6 +32,7 @@ class TestIssue10709 extends WordSpec with Matchers with IdiomaticMockito {
     }
 
     "given a nonempty iterator" should {
+
       "produce the correct cumulative result" in {
         val result = Iterator(1, 2, 3).scanLeft(0)(_ + _)
         result.toSeq shouldBe Seq(0, 1, 3, 6)
@@ -41,7 +44,9 @@ class TestIssue10709 extends WordSpec with Matchers with IdiomaticMockito {
   }
 
   "scanLeftUsingIterate" when {
+
     "given an empty iterator" should {
+
       "produce the correct a singleton result" in {
         val result = scanLeftUsingIterate(Seq.empty[Int].iterator)(0)(_ + _)
         result.toSeq shouldBe Seq(0)
@@ -49,6 +54,7 @@ class TestIssue10709 extends WordSpec with Matchers with IdiomaticMockito {
     }
 
     "given a nonempty iterator" should {
+
       "produce the correct cumulative result" in {
         val result = scanLeftUsingIterate(Iterator(1, 2, 3))(0)(_ + _)
         result.toSeq shouldBe Seq(0, 1, 3, 6)
