@@ -36,7 +36,7 @@ class FurtherStatefulIteratorTests extends WordSpec with Matchers with Idiomatic
     "tested using spy" should {
 
       "not ask for unneeded element" in {
-        val it = spy(Iterator.continually("hello"))
+        val it = spy(Iterator.continually("anyRef"))
         val slidingIt = it sliding 2
         slidingIt.next()
         it.next() wasCalled twice
