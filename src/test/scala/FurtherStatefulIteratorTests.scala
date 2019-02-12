@@ -1,4 +1,4 @@
-import org.mockito.IdiomaticMockito
+import org.mockito.{ IdiomaticMockito, MockitoScalaSession, VerifyMacro }
 import org.scalatest.{ Matchers, WordSpec }
 
 import scala.collection.mutable
@@ -39,6 +39,17 @@ class FurtherStatefulIteratorTests extends WordSpec with Matchers with Idiomatic
         val slidingIt = it sliding 2
         slidingIt.next()
         it.next() wasCalled twice
+      }
+
+      "not ask for unneeded element (strict version)" in {
+        MockitoScalaSession().run {
+          val it = spy(Iterator.continually("anyRef"))
+          val slidingIt = it sliding 2
+          slidingIt.next()
+          it.next() wasCalled twice
+          it.sliding(2) wasCalled once
+          it.hasNext wasCalled atLeast(0.times)
+        }
       }
     }
   }
