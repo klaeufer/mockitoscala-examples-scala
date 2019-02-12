@@ -41,7 +41,7 @@ class FurtherStatefulIteratorTests extends WordSpec with Matchers with Idiomatic
         it.next() wasCalled twice
       }
 
-      "not ask for unneeded element (strict version)" in {
+      "not ask for unneeded element (strict spy version)" in {
         MockitoScalaSession().run {
           val it = spy(Iterator.continually("anyRef"))
           val slidingIt = it sliding 2
