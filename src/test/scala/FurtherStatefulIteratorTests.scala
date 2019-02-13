@@ -1,4 +1,4 @@
-import org.mockito.{ IdiomaticMockito, MockitoScalaSession, VerifyMacro }
+import org.mockito.{ IdiomaticMockito, MockitoScalaSession }
 import org.scalatest.{ Matchers, WordSpec }
 
 import scala.collection.mutable

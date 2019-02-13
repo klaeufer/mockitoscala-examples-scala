@@ -1,7 +1,7 @@
-import org.mockito.IdiomaticMockito
+import org.mockito.{ ArgumentMatchersSugar, IdiomaticMockito, MockitoScalaSession }
 import org.scalatest.{ Matchers, WordSpec }
 
-class TestIssue10709 extends WordSpec with Matchers with IdiomaticMockito {
+class TestIssue10709 extends WordSpec with Matchers with IdiomaticMockito with ArgumentMatchersSugar {
 
   def scanLeftUsingIterate[T, U](it: Iterator[T])(z: U)(op: (U, T) => U): Iterator[U] =
     Iterator.iterate(Option(z)) {
@@ -40,6 +40,17 @@ class TestIssue10709 extends WordSpec with Matchers with IdiomaticMockito {
 
       "exhibit the correct incremental element-by-element behavior" in
         verifyIncremental(_.scanLeft(0)(_ + _))
+
+      "exhibit the correct incremental element-by-element behavior (strict spy version)" in MockitoScalaSession().run {
+        val it = spy(Iterator(1, 2, 3))
+        val expected = Array(0, 1, 3, 6)
+        val result = it.scanLeft(0)(_ + _)
+        for (i <- expected.indices) {
+          result.next() shouldBe expected(i)
+          it.next() wasCalled i.times
+        }
+        it.scanLeft(*)(*) wasCalled once
+      }
     }
   }
 
