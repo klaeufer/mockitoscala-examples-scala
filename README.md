@@ -10,13 +10,14 @@ invoking `next` on the original object only when we invoke `next` on the result 
     result.next()
     it.next() wasCalled once
 
-For a more in-depth discussion on this topic,
-please refer to this technical report (5 pages):
+For a more in-depth discussion on this topic, please refer to this paper (5 pages):
 
-*Auto-generated Spies Increase Test Maintainability* \
-Konstantin Läufer, John O'Sullivan, and George K. Thiruvathukal \
+*Tests as Maintainable Assets Via Auto-generated Spies:* \
+*A case study involving the Scala collections library's Iterator trait* \
+Konstantin Läufer, John O'Sullivan, and George K. Thiruvathukal
+In Proc. [10th ACM SIGPLAN Scala Symposium, July 2019, London, UK](https://2019.ecoop.org/home/scala-2019#program). 
 https://arxiv.org/abs/1808.09630
 
-Also, for the time being, make sure to use reference types as to instantiate any SUTs based on generic Scala traits; see also
+Also, make sure to use reference types as to instantiate any SUTs based on generic Scala traits; see also
 
 https://github.com/mockito/mockito/issues/1605
