@@ -41,7 +41,12 @@ class TestIssue10709 extends WordSpec with Matchers with IdiomaticMockito with A
       "exhibit the correct incremental element-by-element behavior" in
         verifyIncremental(_.scanLeft(0)(_ + _))
 
-      "exhibit the correct incremental element-by-element behavior (strict spy version)" in MockitoScalaSession().run {
+      // Ignoring this test because it includes interactions inside the black box,
+      // where we have insufficient access to verify these.
+      // They are in the implementation of Iterator over an explicit vararg/Seq of items:
+      // elements.scala$collection$IndexedSeqLike$Elements$$$outer(); ->
+      //   at scala.collection.IndexedSeqLike$Elements.next(IndexedSeqLike.scala:65)
+      "exhibit the correct incremental element-by-element behavior (strict spy version)" ignore MockitoScalaSession().run {
         val it = spy(Iterator(1, 2, 3))
         val expected = Array(0, 1, 3, 6)
         val result = it.scanLeft(0)(_ + _)
