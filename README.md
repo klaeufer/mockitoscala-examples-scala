@@ -15,7 +15,7 @@ For a more in-depth discussion on this topic, please refer to this paper (5 page
 *Tests as Maintainable Assets Via Auto-generated Spies:* \
 *A case study involving the Scala collections library's Iterator trait* \
 Konstantin Läufer, John O'Sullivan, and George K. Thiruvathukal \
-In Proc. [10th ACM SIGPLAN Scala Symposium, July 2019, London, UK](https://2019.ecoop.org/home/scala-2019#program). \ 
+In Proc. [10th ACM SIGPLAN Scala Symposium, July 2019, London, UK](https://2019.ecoop.org/home/scala-2019#program).
 https://arxiv.org/abs/1808.09630
 
 Also, make sure to use reference types as to instantiate any SUTs based on generic Scala traits; see also
