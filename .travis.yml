@@ -1,5 +1,13 @@
 sudo: false
 language: scala
+dist: trusty
 scala: 2.12.9
 jdk: oraclejdk11
-script: sbt test
+addons:
+  sonarcloud:
+    organization: "klaeufer-github"
+    token:
+      secure: "Kveu9TDFL8ocC2fcip6SVFnYYwMxVNKXFXB7P0Hup1hNVtoiUTqY9Nke6B3k2Y6zHf6aULceJD/wOXMpzKEm0WkptfPgKE2OavDmMdYPc6jhxCL1zG4fT8mQiPJavtfD6f0G6Yx7AfOPFQWGXjTE+p7e0XBd08JFKlXU6W66+pnbaOtP6AFK+Q2pjHa6f9OTVTZs2ZGI8MsBSmMKdO/NG/e9Lwp5YYGxjnEvr1g1sK7YVEapoySf4APOr3db0du79DEO6iDX5FLIROAusb9EJ+GxIrTUKW+GVjsCrcL+kF0v7CO2ni37t2dGvE9Fnu8bbW5hW1TUVNEXk4knIxYOSrDci2n38RVQuwyC579h/7xOaUsCWmQFPu209q4lVhc/G5MTIJnQP4fCJKRRE9y6dDNhHLJH9QVWC9MIyEulbFcSHZIB/lzj+oGNPRqNUUn4Yc68J+zrbei92DUAVbMR/gEMFA/LgFsFdJ7O1LYBVu5QomcSSLNVlW0nqe25zTiH/TTQ2nXxC9kH+zNCO3xV8XH3Yooxtw1LAcNJxb2G4CVUE5z8n5aoQVE4KVoUZXXo4wqWUQxEt2EiRTRdlsaGR5G8d6KtjUtcPJhrT+NszCWP5YA8RPyzmcc5Zcwuhr8X+hXGcZA1pFxaiU3pyMLZeksdja4u/GWbIB7u0CKSRm8="
+script:
+  - sbt test
+  - sonar-scanner -Dsonar.projectKey=klaeufer_mockitoscala-examples-scala
